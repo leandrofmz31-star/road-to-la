@@ -1,7 +1,7 @@
 /*! Road to LA — service worker
  * Cambia VERSION cada vez que subas cambios: así la app instalada se actualiza.
  */
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const SHELL = `rtla-shell-${VERSION}`;
 const IMAGES = 'rtla-images-v1';
 const META = 'rtla-meta';
