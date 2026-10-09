@@ -22,7 +22,7 @@
     distanceKm: 4380,
     push: {
       // Web Push (opcional): pega aquí tu clave pública VAPID. Ver README.
-      vapidPublicKey: '',
+      vapidPublicKey: 'BGuXrX8UvuqFEqQqcxr2wuVbcFHBt2lvgJSf6yHaBigKUSKn_7yF13QbB-hs7v9aAdIWABwVYuvq3pnIHrZ9D24',
       dailyHour: 8,
     },
   };
