@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Road to LA: claves VAPID</title>
+<style>
+  body { margin: 0; background: #0a1030; color: #fff4e4; font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 18px 60px; }
+  h1 { margin: 0 0 8px; font-size: 26px; }
+  p { color: #cfc8e3; }
+  button { min-height: 48px; padding: 0 20px; border: 0; border-radius: 999px; background: #ffc24b; color: #1a1030; font: 800 15px system-ui, sans-serif; cursor: pointer; }
+  button.ghost { min-height: 42px; margin-top: 6px; background: transparent; color: #fff4e4; box-shadow: inset 0 0 0 1.5px rgba(255, 244, 228, .35); }
+  label { display: block; margin: 20px 0 6px; font-weight: 700; }
+  textarea { width: 100%; min-height: 76px; box-sizing: border-box; padding: 10px; border: 0; border-radius: 10px; background: #141838; color: #fff4e4; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .warn { padding: 12px 14px; border-radius: 12px; background: rgba(255, 46, 136, .16); color: #ffd3e6; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Generar claves VAPID</h1>
+  <p>Las claves se crean aquí mismo, en tu navegador, con la Web Crypto API. No se envían a ningún servidor.</p>
+  <button id="gen" type="button">Generar un par de claves</button>
+  <div id="out" hidden>
+    <label for="pub">Clave pública: va en data.js y en el secreto VAPID_PUBLIC_KEY</label>
+    <textarea id="pub" readonly></textarea>
+    <button class="ghost" type="button" data-copy="pub">Copiar clave pública</button>
+    <label for="priv">Clave privada: solo en el secreto VAPID_PRIVATE_KEY</label>
+    <textarea id="priv" readonly></textarea>
+    <button class="ghost" type="button" data-copy="priv">Copiar clave privada</button>
+    <p class="warn">La clave privada no va en ningún archivo del repositorio: guárdala solo como secreto de GitHub. Si recargas esta página se pierde y tendrías que generar otro par.</p>
+  </div>
+  <p id="err" class="warn" hidden></p>
+</main>
+<script>
+  (function () {
+    function b64url(bytes) {
+      var s = '';
+      for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+      return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    document.getElementById('gen').addEventListener('click', async function () {
+      var err = document.getElementById('err');
+      try {
+        if (!window.crypto || !crypto.subtle) throw new Error('Este navegador no permite generar claves. Abre la página desde su enlace https.');
+        var kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+        var raw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
+        var jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+        document.getElementById('pub').value = b64url(raw);
+        document.getElementById('priv').value = jwk.d;
+        document.getElementById('out').hidden = false;
+        err.hidden = true;
+      } catch (e) {
+        err.textContent = e.message || String(e);
+        err.hidden = false;
+      }
+    });
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-copy]');
+      if (!b) return;
+      var t = document.getElementById(b.getAttribute('data-copy'));
+      navigator.clipboard.writeText(t.value).then(function () { b.textContent = 'Copiada'; }, function () { t.select(); });
+    });
+  })();
+</script>
+</body>
+</html>
