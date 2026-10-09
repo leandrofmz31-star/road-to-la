@@ -1,0 +1,29 @@
+# Road to LA: notificación diaria por Web Push (opcional y gratis).
+# Si no configuras los secretos, el flujo termina sin hacer nada y sin errores.
+name: Road to LA daily push
+
+on:
+  schedule:
+    - cron: '3 14 * * *'   # 14:03 UTC = 8:03 a. m. en Costa Rica (GitHub puede retrasarlo unos minutos)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar web-push
+        run: npm install --no-save --no-audit --no-fund web-push@3
+      - name: Enviar la notificación del día
+        run: node scripts/send-push.mjs
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          PUSH_SUBSCRIPTIONS: ${{ secrets.PUSH_SUBSCRIPTIONS }}
